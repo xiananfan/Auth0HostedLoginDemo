@@ -22,13 +22,10 @@ export class AuthService {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
     localStorage.setItem('returnUrl', returnUrl);
 
-    // -------- Redirect to hosted login
-    // this.auth0.authorize();
-
     // -------- Redirect in Pop-up (also to hosted login)
-    // this needs at least one option, so it doesn't error out on 'convert null to object'
-    // this needs to work with the callback component, it needs to call webauth.popup.callback() to invoke the
-    // callback function passed in as the 2nd parameter here.
+    // 1. this needs at least one option, so it doesn't error out on 'convert null to object'
+    // 2. this needs to work with the callback component, the callback component needs to call
+    // webAuth.popup.callback() to invoke the callback function passed in as the 2nd parameter here.
     this.auth0.popup.authorize({
       redirectUri: 'http://localhost:4200/callback'
     }, (err, authResult) => {
@@ -40,20 +37,6 @@ export class AuthService {
         this.router.navigateByUrl(returnUrl);
       }
     });
-  }
-
-  public handleAuthentication(): void {
-    // this.auth0.parseHash((err, authResult) => {
-    //   if (authResult && authResult.accessToken && authResult.idToken) {
-    //     window.location.hash = '';
-    //     this.setSession(authResult);
-    //     const returnUrl = localStorage.getItem('returnUrl');
-    //     this.router.navigateByUrl(returnUrl);
-    //   } else if (err) {
-    //     this.router.navigate(['/home']);
-    //     console.log(err);
-    //   }
-    // });
   }
 
   private setSession(authResult): void {
