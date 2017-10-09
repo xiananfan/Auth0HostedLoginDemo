@@ -12,7 +12,8 @@ export class AuthService {
     responseType: 'token id_token',
     audience: 'https://dev.api.teradatacloud.io/',
     redirectUri: 'http://localhost:4200/callback',
-    scope: 'openid profile'
+    scope: 'openid profile',
+    leeway: 30
   });
 
   constructor(private router: Router, private route: ActivatedRoute) {}
@@ -21,21 +22,38 @@ export class AuthService {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
     localStorage.setItem('returnUrl', returnUrl);
 
-    this.auth0.authorize();
+    // -------- Redirect to hosted login
+    // this.auth0.authorize();
+
+    // -------- Redirect in Pop-up (also to hosted login)
+    // this needs at least one option, so it doesn't error out on 'convert null to object'
+    // this needs to work with the callback component, it needs to call webauth.popup.callback() to invoke the
+    // callback function passed in as the 2nd parameter here.
+    this.auth0.popup.authorize({
+      redirectUri: 'http://localhost:4200/callback'
+    }, (err, authResult) => {
+      if (err) {
+        this.router.navigate(['/home']);
+        console.log(err);
+      } else {
+        this.setSession(authResult);
+        this.router.navigateByUrl(returnUrl);
+      }
+    });
   }
 
   public handleAuthentication(): void {
-    this.auth0.parseHash((err, authResult) => {
-      if (authResult && authResult.accessToken && authResult.idToken) {
-        window.location.hash = '';
-        this.setSession(authResult);
-        const returnUrl = localStorage.getItem('returnUrl');
-        this.router.navigateByUrl(returnUrl);
-      } else if (err) {
-        this.router.navigate(['/home']);
-        console.log(err);
-      }
-    });
+    // this.auth0.parseHash((err, authResult) => {
+    //   if (authResult && authResult.accessToken && authResult.idToken) {
+    //     window.location.hash = '';
+    //     this.setSession(authResult);
+    //     const returnUrl = localStorage.getItem('returnUrl');
+    //     this.router.navigateByUrl(returnUrl);
+    //   } else if (err) {
+    //     this.router.navigate(['/home']);
+    //     console.log(err);
+    //   }
+    // });
   }
 
   private setSession(authResult): void {
