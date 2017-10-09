@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 
+import { CovalentLayoutModule, CovalentStepsModule /*, any other modules */ } from '@covalent/core';
+
 import { AppComponent } from './app.component';
 import { CallbackComponent } from './components/callback/callback.component';
 import { FavoriteComponent } from './components/favorite/favorite.component';
@@ -24,6 +26,8 @@ import { AuthService } from './services/auth/auth.service';
     HomeComponent
   ],
   imports: [
+    CovalentLayoutModule,
+    CovalentStepsModule,
     BrowserModule,
     FormsModule,
     RouterModule.forRoot([

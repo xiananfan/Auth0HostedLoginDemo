@@ -29,6 +29,9 @@
       }
     }
   ],
+  "styles": [
+    "../node_modules/@covalent/core/common/platform.scss"
+  ],
   "e2e": {
     "protractor": {
       "config": "./protractor.conf.js"
