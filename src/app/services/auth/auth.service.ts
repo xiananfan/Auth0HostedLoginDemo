@@ -18,75 +18,25 @@ export class AuthService {
 
   constructor(private router: Router, private route: ActivatedRoute) {}
 
-  public login(): void {
+  public login(credential: any): void {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
     localStorage.setItem('returnUrl', returnUrl);
 
-    // -------- Redirect to hosted login
-    // this.auth0.authorize();
-
-    // -------- Redirect in Pop-up (also to hosted login)
-    // this needs at least one option, so it doesn't error out on 'convert null to object'
-    // this needs to work with the callback component, it needs to call webauth.popup.callback() to invoke the
-    // callback function passed in as the 2nd parameter here.
-    // this.auth0.popup.authorize({
-    //   redirectUri: 'http://localhost:4200/callback'
-    // }, (err, authResult) => {
-    //   if (err) {
-    //     this.router.navigate(['/home']);
-    //     console.log(err);
-    //   } else {
-    //     this.setSession(authResult);
-    //     this.router.navigateByUrl(returnUrl);
-    //   }
-    // });
-
-    // -------- Redirect login with credential
-    // currently not working, will encounter "Password login is disabled for clients using externally hosted login
-    // pages with oidc_conformant flag set."
-    // this.auth0.redirect.loginWithCredentials({
-    //   connection: 'Username-Password-Authentication',
-    //   username: 'xianan.fan',
-    //   password: '123456'
-    // }, (err, authResult) => {
-    //   if (err) {
-    //     this.router.navigate(['/home']);
-    //     console.log(err);
-    //   } else {
-    //     this.setSession(authResult);
-    //     this.router.navigateByUrl(returnUrl);
-    //   }
-    // });
-
-    // -------- pop-up login with credentials
-    // currently not working, will encounter "Password login is disabled for clients using externally hosted login
-    // pages with oidc_conformant flag set."
-    // this.auth0.popup.loginWithCredentials({
-    //   connection: 'Username-Password-Authentication',
-    //   username: 'xianan.fan',
-    //   password: '123456',
-    //   scope: 'openid profile'
-    // }, (err, authResult) => {
-    //   if (err) {
-    //     this.router.navigate(['/home']);
-    //     console.log(err);
-    //   } else {
-    //     this.setSession(authResult);
-    //     this.router.navigateByUrl(returnUrl);
-    //   }
-    // });
+    console.log('username', credential.username);
+    console.log('password', credential.password);
 
     // -------- Authenticate with API, requires custom UI
     // Works. One issue: all scopes defined on the API in Auth0 is returned.
     this.auth0.client.login({
       realm: 'Username-Password-Authentication',
-      username: 'xianan.fan',
-      password: '123456',
+      username: credential.username,
+      password: credential.password,
       // scope: 'openid profile',
       // audience: 'https://dev.api.teradatacloud.io/'
     }, (err, authResult) => {
       if (err) {
-        this.router.navigate(['/home']);
+        // this.router.navigate(['/login']);
+        alert('Failed to login: ' + err.message);
         console.log(err);
       } else {
         this.setSession(authResult);

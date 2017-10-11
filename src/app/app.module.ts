@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatFormField, MatHint } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 
-import { CovalentLayoutModule, CovalentStepsModule /*, any other modules */ } from '@covalent/core';
+import { CovalentLayoutModule, CovalentStepsModule } from '@covalent/core';
 
 import { AppComponent } from './app.component';
 import { CallbackComponent } from './components/callback/callback.component';
@@ -15,6 +16,7 @@ import { TitleCasePipe } from './pipes/title-case.pipe';
 import { AuthGuardService } from './services/auth-guard/auth-guard.service';
 import { AuthService } from './services/auth/auth.service';
 
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -23,7 +25,9 @@ import { AuthService } from './services/auth/auth.service';
     TitleCasePipe,
     LoginComponent,
     CallbackComponent,
-    HomeComponent
+    HomeComponent,
+    MatFormField,
+    MatHint
   ],
   imports: [
     CovalentLayoutModule,
