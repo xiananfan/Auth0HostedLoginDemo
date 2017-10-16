@@ -13,7 +13,7 @@
       <button
         class="btn btn-primary btn-margin"
         *ngIf="!auth.isAuthenticated()"
-        routerLink="/login">
+        (click)="auth.login()">
         Log In
       </button>
 
@@ -22,6 +22,12 @@
         *ngIf="auth.isAuthenticated()"
         (click)="auth.logout()">
         Log Out
+      </button>
+
+      <button
+        class="btn btn-primary btn-margin"
+        (click)="auth.getSSOData()">
+        GetSSOData
       </button>
 
     </div>
