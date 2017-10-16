@@ -46,7 +46,8 @@ export class AuthService {
         window.location.hash = '';
         this.setSession(authResult);
         const returnUrl = localStorage.getItem('returnUrl');
-        this.router.navigateByUrl(returnUrl);
+        console.log('navigate to ', returnUrl);
+        this.router.navigateByUrl('/home');
       } else if (err) {
         this.router.navigate(['/home']);
         console.log(err);
