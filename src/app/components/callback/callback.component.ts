@@ -8,11 +8,12 @@ import { AuthService } from '../../services/auth/auth.service';
 })
 export class CallbackComponent implements OnInit {
 
-  constructor(private auth: AuthService) { }
+  constructor(private auth: AuthService) {
+    this.auth.handleAuthentication();
+  }
 
   ngOnInit() {
-    // this.auth.auth0.popup.callback();
-    // this.auth.handleAuthentication();
+    console.log(window.location.hash);
   }
 
 }

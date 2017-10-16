@@ -10,13 +10,13 @@ import { Router } from '@angular/router';
 export class LoginComponent implements OnInit {
   invalidLogin: boolean;
 
-  constructor(private router: Router, private auth: AuthService) { }
+  constructor(private router: Router, public auth: AuthService) { }
 
   ngOnInit() {
   }
 
   signIn(credentials) {
-    this.auth.login();
+    this.auth.login(credentials);
   }
 
 }

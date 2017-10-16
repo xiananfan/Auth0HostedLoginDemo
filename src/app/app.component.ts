@@ -10,6 +10,7 @@ export class AppComponent {
 
   constructor(private auth: AuthService) {
     // auth.handleAuthentication();
+    console.log('app component constructed.');
   }
 
 }
