@@ -8,8 +8,8 @@ import { AuthService } from './services/auth/auth.service';
 })
 export class AppComponent {
 
-  constructor(private auth: AuthService) {
-    auth.handleAuthentication();
+  // AuthService is needed in the view template
+  constructor(public auth: AuthService) {
   }
 
 }

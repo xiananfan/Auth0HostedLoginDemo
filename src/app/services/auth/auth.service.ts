@@ -1,112 +1,89 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import 'rxjs/add/operator/filter';
-import * as auth0 from 'auth0-js';
+import { WebAuth } from 'auth0-js';
+import Auth0Lock from 'auth0-lock';
 
 @Injectable()
 export class AuthService {
 
-  auth0 = new auth0.WebAuth({
-    clientID: 'BT57J15EHFqB516RYiMqU73l956RU6rU',
-    domain: 'trianglebamboo.auth0.com',
-    responseType: 'token id_token',
-    audience: 'https://dev.api.teradatacloud.io/',
-    redirectUri: 'http://localhost:4200/callback',
-    scope: 'openid profile',
-    leeway: 30
-  });
+  auth0: WebAuth;
+  lock: Auth0Lock;
 
-  constructor(private router: Router, private route: ActivatedRoute) {}
+  constructor(private router: Router, private route: ActivatedRoute) {
+    this.auth0 = new WebAuth({
+      clientID: 'BT57J15EHFqB516RYiMqU73l956RU6rU',
+      domain: 'trianglebamboo.auth0.com',
+      responseType: 'token id_token',
+      audience: 'https://dev.api.teradatacloud.io/',
+      redirectUri: 'https://localhost:4200/callback',
+      scope: 'openid profile',
+      leeway: 30
+    });
 
-  public login(): void {
-    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
-    localStorage.setItem('returnUrl', returnUrl);
+    this.lock = new Auth0Lock('BT57J15EHFqB516RYiMqU73l956RU6rU', 'trianglebamboo.auth0.com',
+    // this.lock = new Auth0Lock('QrpZYg7U44NyypQFapK26Rpmk2Y5xBZD', 'sso.teradatacloud.io',
+      {
+        allowedConnections: ['Username-Password-Authentication'],
+        // allowedConnections: ['AD-DEV'],
+        auth: {
+          audience: 'https://dev.api.teradatacloud.io/',
+          params: {
+            scope: 'openid profile',
+            // state: 'my-custom-state',
+            // nonce: '12345'
+          },
+          redirect: true,
+          redirectUrl: 'https://localhost:4200/callback',
+          // responseMode: 'form_post',
+          responseType: 'token id_token',
+          sso: true,
+        },
+        prefill: {
+          username: 'xianan.fan'
+        },
+        allowSignUp: false,
+        // defaultDatabaseConnection: 'Username-Password-Authentication',
+        oidcConformant: true,
+        hashCleanup: true,
+        leeway: 30
+      }
+    );
 
-    // -------- Redirect to hosted login
-    // this.auth0.authorize();
-
-    // -------- Redirect in Pop-up (also to hosted login)
-    // this needs at least one option, so it doesn't error out on 'convert null to object'
-    // this needs to work with the callback component, it needs to call webauth.popup.callback() to invoke the
-    // callback function passed in as the 2nd parameter here.
-    // this.auth0.popup.authorize({
-    //   redirectUri: 'http://localhost:4200/callback'
-    // }, (err, authResult) => {
-    //   if (err) {
-    //     this.router.navigate(['/home']);
-    //     console.log(err);
-    //   } else {
-    //     this.setSession(authResult);
-    //     this.router.navigateByUrl(returnUrl);
-    //   }
-    // });
-
-    // -------- Redirect login with credential
-    // currently not working, will encounter "Password login is disabled for clients using externally hosted login
-    // pages with oidc_conformant flag set."
-    // this.auth0.redirect.loginWithCredentials({
-    //   connection: 'Username-Password-Authentication',
-    //   username: 'xianan.fan',
-    //   password: '123456'
-    // }, (err, authResult) => {
-    //   if (err) {
-    //     this.router.navigate(['/home']);
-    //     console.log(err);
-    //   } else {
-    //     this.setSession(authResult);
-    //     this.router.navigateByUrl(returnUrl);
-    //   }
-    // });
-
-    // -------- pop-up login with credentials
-    // currently not working, will encounter "Password login is disabled for clients using externally hosted login
-    // pages with oidc_conformant flag set."
-    // this.auth0.popup.loginWithCredentials({
-    //   connection: 'Username-Password-Authentication',
-    //   username: 'xianan.fan',
-    //   password: '123456',
-    //   scope: 'openid profile'
-    // }, (err, authResult) => {
-    //   if (err) {
-    //     this.router.navigate(['/home']);
-    //     console.log(err);
-    //   } else {
-    //     this.setSession(authResult);
-    //     this.router.navigateByUrl(returnUrl);
-    //   }
-    // });
-
-    // -------- Authenticate with API, requires custom UI
-    // Works. One issue: all scopes defined on the API in Auth0 is returned.
-    this.auth0.client.login({
-      realm: 'Username-Password-Authentication',
-      username: 'xianan.fan',
-      password: '123456',
-      // scope: 'openid profile',
-      // audience: 'https://dev.api.teradatacloud.io/'
-    }, (err, authResult) => {
-      if (err) {
-        this.router.navigate(['/home']);
-        console.log(err);
-      } else {
+    this.lock.on('authenticated', (authResult) => {
+      console.log(authResult);
+      if (authResult && authResult.accessToken && authResult.idToken) {
+        // window.location.hash = '';
         this.setSession(authResult);
+        const returnUrl = localStorage.getItem('returnUrl');
         this.router.navigateByUrl(returnUrl);
+      } else {
+        // this.router.navigate(['/home']);
+        console.log('authResult doesn\'t contain accessToken and idToken');
       }
     });
   }
 
+  // Called by app.component.html
+  public login(): void {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+    localStorage.setItem('returnUrl', returnUrl);
+
+    this.lock.show();
+  }
+
   public handleAuthentication(): void {
-    // this.auth0.parseHash((err, authResult) => {
-    //   if (authResult && authResult.accessToken && authResult.idToken) {
-    //     window.location.hash = '';
-    //     this.setSession(authResult);
-    //     const returnUrl = localStorage.getItem('returnUrl');
-    //     this.router.navigateByUrl(returnUrl);
-    //   } else if (err) {
-    //     this.router.navigate(['/home']);
-    //     console.log(err);
-    //   }
-    // });
+    this.auth0.parseHash((err, authResult) => {
+      if (authResult && authResult.accessToken && authResult.idToken) {
+        window.location.hash = '';
+        this.setSession(authResult);
+        const returnUrl = localStorage.getItem('returnUrl');
+        this.router.navigateByUrl(returnUrl);
+      } else if (err) {
+        this.router.navigate(['/home']);
+        console.log(err);
+      }
+    });
   }
 
   private setSession(authResult): void {
@@ -122,8 +99,11 @@ export class AuthService {
     localStorage.removeItem('access_token');
     localStorage.removeItem('id_token');
     localStorage.removeItem('expires_at');
-    // Go back to the home route
-    this.router.navigate(['/']);
+
+    // Go back to the home route after clear the SSO session on auth0 server
+    this.lock.logout({
+      returnTo: 'https://localhost:4200/home'
+    });
   }
 
   public isAuthenticated(): boolean {
@@ -131,6 +111,16 @@ export class AuthService {
     // access token's expiry time
     const expiresAt = JSON.parse(localStorage.getItem('expires_at'));
     return new Date().getTime() < expiresAt;
+  }
+
+  public getSSOData(): void {
+    this.auth0.client.getSSOData(true, (err, ssoData) => {
+      if (err) {
+        console.log('Encountered an error:', err.message);
+      } else {
+        console.log(ssoData);
+      }
+    });
   }
 
 }
